@@ -366,11 +366,7 @@
                             <li class="nav-item"><a class="nav-link text-success" href="dieu-khoan.html">Điều khoản sử dụng</a></li>
                             <li class="nav-item"><a class="nav-link text-success" href="bao-mat.html">Chính sách bảo mật</a></li>
                             <li class="nav-item"><a class="nav-link text-success" href="chinh-sach-khac.html">Các chính sách khác</a></li>
-                            <li class="nav-item">
-                                <a class="nav-link text-success" href="#" onclick="showAdminLogin()">
-                                    <i class="fas fa-cog"></i> Admin Panel
-                                </a>
-                            </li>
+
                         </ul>
                     </div>
                 </div>
@@ -382,6 +378,19 @@
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="./js/lst-products.js"></script>
     <script src="./js/auth-cart.js"></script>
+    
+    <script>
+        // Kiểm tra URL parameter để hiển thị admin login
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('a')) {
+                // Hiển thị modal admin login
+                if (typeof showAdminLogin === 'function') {
+                    showAdminLogin();
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

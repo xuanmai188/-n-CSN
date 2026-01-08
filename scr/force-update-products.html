@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Update Products</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #1e7e34; }
+        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Force Update Products</h1>
+    
+    <div class="info">
+        <h3>Thông tin hiện tại:</h3>
+        <p><strong>Admin Products:</strong> <span id="adminCount">0</span> sản phẩm</p>
+        <p><strong>Default Products:</strong> <span id="defaultCount">0</span> sản phẩm</p>
+        <p><strong>Prevent Sample Data:</strong> <span id="preventFlag">false</span></p>
+    </div>
+    
+    <button class="btn" onclick="forceSyncProducts()">🔄 Force Sync All Products</button>
+    <button class="btn" onclick="clearAdminProducts()">🗑️ Clear Admin Products</button>
+    <button class="btn" onclick="clearPreventFlag()">✅ Clear Prevent Flag</button>
+    <button class="btn" onclick="refreshInfo()">🔍 Refresh Info</button>
+    
+    <div id="result"></div>
+    
+    <script src="js/lst-products.js"></script>
+    <script>
+        function refreshInfo() {
+            const adminProducts = JSON.parse(localStorage.getItem("adminProducts")) || [];
+            const preventFlag = localStorage.getItem('preventSampleData');
+            
+            document.getElementById('adminCount').textContent = adminProducts.length;
+            document.getElementById('defaultCount').textContent = defaultProducts.length;
+            document.getElementById('preventFlag').textContent = preventFlag || 'false';
+        }
+        
+        function forceSyncProducts() {
+            localStorage.setItem("adminProducts", JSON.stringify(defaultProducts));
+            document.getElementById('result').innerHTML = `<div style="color: green; margin: 10px 0;">✅ Đã force sync ${defaultProducts.length} sản phẩm!</div>`;
+            refreshInfo();
+        }
+        
+        function clearAdminProducts() {
+            localStorage.removeItem("adminProducts");
+            document.getElementById('result').innerHTML = `<div style="color: orange; margin: 10px 0;">🗑️ Đã xóa admin products!</div>`;
+            refreshInfo();
+        }
+        
+        function clearPreventFlag() {
+            localStorage.removeItem('preventSampleData');
+            document.getElementById('result').innerHTML = `<div style="color: blue; margin: 10px 0;">✅ Đã xóa prevent flag!</div>`;
+            refreshInfo();
+        }
+        
+        // Auto refresh on load
+        document.addEventListener('DOMContentLoaded', refreshInfo);
+    </script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đặt hàng trước - Healthy Care</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- All CSS -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./fontawesome-free-6.3.0-web/css/all.min.css">
+    <!-- CSS main-->
+    <link rel="stylesheet" href="./css/main.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white bg-gradient shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="./img/web-logo.png" width="120px" alt="Web Logo Header">
+            </a>
+            
+            <!-- Nút trở về Admin - chỉ hiển thị khi admin đã đăng nhập -->
+            <div id="adminReturnButton" class="d-none">
+                <a href="admin.html" class="btn btn-outline-primary btn-sm me-3">
+                    <i class="fas fa-crown me-1"></i>Trở về Admin
+                </a>
+            </div>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-success" href="index.html">Trang chủ</a>
+                    </li>
+                    <li class="nav-item dropdown product-hover">
+                        <a class="nav-link text-success dropdown-toggle" href="products.html">
+                            Sản phẩm
+                        </a>
+
+                        <ul class="dropdown-menu simple-dropdown shadow">
+                            <li><a class="dropdown-item" href="products.html?category=Nutritious cereals">Ngũ cốc bổ dưỡng</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=Pulses">Các loại đậu</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=Spices and Condiments">Gia vị và nước chấm</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=Cooking oils">Thực phẩm chức năng và mỹ phẩm thiên nhiên</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=Rice">Gạo và các sản phẩm từ gạo</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-success" href="contact-us.html">Liên hệ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-success" href="about-us.html">Giới Thiệu</a>
+                    </li>
+
+                    <li class="nav-item dropdown" id="userArea">
+                        <a class="nav-link text-success dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-user"></i> Đăng nhập
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" id="userDropdown">
+                            <li><a class="dropdown-item" href="#">Tài khoản của tôi</a></li>
+                            <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                            <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                            <li><a class="dropdown-item" href="#" id="btnLogout">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item ms-3">
+                        <button class="btn btn-success position-relative" id="btnCart" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasCart">
+                            Giỏ hàng <span id="cartCount" class="cart-count ms-1">0</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0 p-4 mt-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                        <h2 class="text-warning">Đặt hàng trước</h2>
+                        <p class="text-muted">Sản phẩm hiện đang hết hàng. Vui lòng điền thông tin để đặt hàng trước.</p>
+                    </div>
+
+                    <!-- Thông tin sản phẩm -->
+                    <div class="card bg-light mb-4" id="productInfo" style="display: none;">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <img id="productImage" src="" alt="" class="img-fluid rounded">
+                                </div>
+                                <div class="col-md-9">
+                                    <h5 id="productTitle" class="mb-2"></h5>
+                                    <p class="text-muted mb-2">Giá: <span id="productPrice" class="fw-bold text-success"></span></p>
+                                    <span class="badge bg-danger">Hết hàng</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="preOrderForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" id="customerName" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" id="customerPhone" class="form-control" pattern="0[0-9]{9}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="customerEmail" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+                            <textarea id="customerAddress" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Số lượng mong muốn <span class="text-danger">*</span></label>
+                                    <input type="number" id="quantity" class="form-control" min="1" value="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Thời gian mong muốn nhận hàng</label>
+                                    <select id="expectedTime" class="form-select">
+                                        <option value="asap">Sớm nhất có thể</option>
+                                        <option value="1week">Trong 1 tuần</option>
+                                        <option value="2weeks">Trong 2 tuần</option>
+                                        <option value="1month">Trong 1 tháng</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Ghi chú thêm</label>
+                            <textarea id="notes" class="form-control" rows="3" placeholder="Thêm ghi chú về đơn hàng của bạn..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Chúng tôi sẽ liên hệ với bạn khi sản phẩm có hàng trở lại</li>
+                                <li>Thanh toán sẽ được thực hiện khi giao hàng</li>
+                                <li>Bạn có thể hủy đơn đặt hàng trước bất cứ lúc nào</li>
+                                <li>Giá sản phẩm có thể thay đổi theo thời điểm giao hàng</li>
+                            </ul>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-warning btn-lg px-5">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi đơn đặt hàng trước
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="farm-img">
+        <img src="./img/footer-bg.png" class="img-fluid" width="718" height="239" alt="Footer background">
+    </div>
+    
+    <footer class="bg-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-sm-6">
+                    <div class="single-box">
+                        <img src="./img/web-logo.png" width="250px" alt="Web Logo Footer">
+                        <ul class="nav flex-column" style="margin-left: -15px;">
+                            <li class="nav-item">
+                                <a class="nav-link text-success" href="#">
+                                    <i class="fa-solid fa-location-dot"></i>&nbsp;
+                                    Phường 1, Trà Vinh, Việt Nam
+                                </a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link text-success" href="#"><i class="fa-solid fa-phone"></i>&nbsp;
+                                    0382 020 858 - 0222 342 495 </a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="#"> <i
+                                        class="fa-sharp fa-regular fa-envelope"></i>&nbsp; support@aptech.vn</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="single-box">
+                        <h2 class="fs-6 text-uppercase">HỢP TÁC & PHÁT TRIỂN</h2>
+                        <ul class="nav flex-column" style="margin-left: -15px;">
+                            <li class="nav-item"><a class="nav-link text-success" href="dai-ly.html">Trở thành đại lý Nông trại Hữu cơ</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="bang-gia.html">Bảng giá bán lẻ</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="thu-vien-anh.html">Thư viện ảnh</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="single-box">
+                        <h2 class="fs-6 text-uppercase">Giá trị cốt lõi</h2>
+                        <ul class="nav flex-column" style="margin-left: -15px;">
+                            <li><a class="nav-link text-success" href="gia-tri-dao-duc.html">Kinh doanh dựa trên giá trị đạo đức</a></li>
+                            <li><a class="nav-link text-success" href="khach-hang-trung-tam.html">Đặt khách hàng làm trung tâm</a></li>
+                            <li><a class="nav-link text-success" href="chat-luong-an-toan.html">Chất lượng và an toàn</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="single-box">
+                        <h2 class="fs-6 text-uppercase">Giới thiệu</h2>
+                        <ul class="nav flex-column" style="margin-left: -15px;">
+                            <li class="nav-item"><a class="nav-link text-success" href="about-us.html">Về chúng tôi</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="tu-van.html">Tư vấn</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="dieu-khoan.html">Điều khoản sử dụng</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="bao-mat.html">Chính sách bảo mật</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="chinh-sach-khac.html">Các chính sách khác</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal: Success -->
+    <div class="modal fade" id="modalPreOrderSuccess" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center py-4">
+                <div class="modal-body">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4 class="text-success mb-3">Đặt hàng trước thành công!</h4>
+                    <p class="text-muted mb-3">Mã đơn hàng: <strong id="preOrderId">#HC0001</strong></p>
+                    <div class="alert alert-info text-start">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Thông tin quan trọng:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Chúng tôi sẽ liên hệ với bạn khi có hàng</li>
+                            <li>Đơn hàng đã được lưu vào hệ thống</li>
+                            <li>Bạn có thể theo dõi trong lịch sử mua hàng</li>
+                        </ul>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">
+                            <i class="fas fa-shopping-bag me-2"></i>Tiếp tục mua sắm
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="openHistoryModal(); bootstrap.Modal.getInstance(document.getElementById('modalPreOrderSuccess')).hide();">
+                            <i class="fas fa-history me-2"></i>Xem lịch sử đơn hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include modals from other pages -->
+    <main class="container">
+        <!-- Offcanvas Cart -->
+        <div class="offcanvas offcanvas-end" id="offcanvasCart" style="width:420px">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">Giỏ hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column">
+                <div id="cartItems" class="mb-3"><!-- JS render --></div>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Tổng:</strong>
+                        <strong id="cartTotal">0₫</strong>
+                    </div>
+                    <button class="btn btn-success w-100 mb-2" id="btnCheckout" data-bs-dismiss="offcanvas">Tiến hành thanh toán</button>
+                    <button class="btn btn-outline-secondary w-100" id="btnClearCart">Xóa giỏ hàng</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Checkout -->
+        <div class="modal fade" id="modalCheckout" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thanh toán</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="checkoutForm" class="form-checkout">
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên</label>
+                                <input type="text" id="custName" class="form-control" placeholder="Nhập họ tên của bạn" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" id="custPhone" class="form-control" placeholder="0123 456 789" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Địa chỉ giao hàng</label>
+                                <input type="text" id="custAddress" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phương thức thanh toán</label>
+                                <select id="payMethod" class="form-select">
+                                    <option value="cod">Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="bank">Chuyển khoản ngân hàng</option>
+                                </select>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-success">Xác nhận đặt hàng</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div class="modal fade" id="modalAuth" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authTitle">Đăng nhập</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="authForm">
+                        <div class="mb-3" id="authNameWrapper" style="display:none">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" id="authName" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tên đăng nhập</label>
+                            <input type="text" id="authUsername" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu</label>
+                            <input type="password" id="authPassword" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-3" id="authConfirmPasswordWrapper" style="display:none">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" id="authConfirmPassword" class="form-control">
+                        </div>
+                        <div class="mb-3" id="authAddressWrapper" style="display:none">
+                            <label class="form-label">Địa chỉ giao hàng</label>
+                            <input type="text" id="authAddress" class="form-control">
+                        </div>
+                        <div class="mb-3" id="authPhoneWrapper" style="display:none">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" id="authPhone" class="form-control">
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-success">Xác nhận</button>
+                        </div>
+                    </form>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="#" id="toggleAuth">Chưa có tài khoản? Đăng ký</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="modalProfile" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thông tin tài khoản</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="updateProfile(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Họ tên</label>
+                            <input type="text" id="profileName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tên đăng nhập</label>
+                            <input type="text" id="profileUsername" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ giao hàng</label>
+                            <input type="text" id="profileAddress" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" id="profilePhone" class="form-control">
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Cập nhật thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal fade" id="modalHistory" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Lịch sử mua hàng</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="historyBody">
+                    <!-- JS render -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Js -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="./js/lst-products.js"></script>
+    <script src="./js/auth-cart.js"></script>
+
+    <script>
+        // Pre-order form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in first
+            const user = JSON.parse(localStorage.getItem("currentUser"));
+            
+            if (!user) {
+                // User not logged in - show login modal immediately
+                showLoginRequiredMessage();
+                return;
+            }
+            
+            // User is logged in - proceed with normal flow
+            initializePreOrderForm();
+        });
+
+        function showLoginRequiredMessage() {
+            // Hide the pre-order form
+            document.getElementById('preOrderForm').style.display = 'none';
+            
+            // Show login required message
+            const container = document.querySelector('.container .row .col-md-8 .card');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-user-lock fa-4x text-warning mb-4"></i>
+                    <h3 class="text-warning mb-3">Yêu cầu đăng nhập</h3>
+                    <p class="text-muted mb-4">
+                        Bạn cần đăng nhập để có thể đặt hàng trước.<br>
+                        Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục.
+                    </p>
+                    
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <button class="btn btn-success btn-lg" onclick="openAuthModal()">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="window.location.href='products.html'">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại trang sản phẩm
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Tại sao cần đăng nhập?</strong><br>
+                        <small>
+                            • Để lưu thông tin đặt hàng vào tài khoản của bạn<br>
+                            • Để chúng tôi có thể liên hệ khi có hàng<br>
+                            • Để bạn có thể theo dõi trạng thái đơn hàng
+                        </small>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initializePreOrderForm() {
+            // Get product info from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const quantity = urlParams.get('qty') || 1;
+            
+            if (productId) {
+                const products = refreshProducts();
+                const product = products.find(p => p.id === parseInt(productId));
+                
+                if (product) {
+                    // Show product info
+                    document.getElementById('productInfo').style.display = 'block';
+                    document.getElementById('productImage').src = product.thumbnail;
+                    document.getElementById('productTitle').textContent = product.title;
+                    document.getElementById('productPrice').textContent = product.price.toLocaleString("vi-VN") + " đ";
+                    
+                    // Set quantity from URL parameter
+                    document.getElementById('quantity').value = quantity;
+                } else {
+                    // Product not found
+                    showProductNotFound();
+                    return;
+                }
+            } else {
+                // No product ID
+                showProductNotFound();
+                return;
+            }
+
+            // Auto-fill user info if logged in
+            const user = JSON.parse(localStorage.getItem("currentUser"));
+            if (user) {
+                document.getElementById('customerName').value = user.name || '';
+                document.getElementById('customerPhone').value = user.phone || '';
+                document.getElementById('customerAddress').value = user.address || '';
+            }
+
+            // Handle form submission
+            document.getElementById('preOrderForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Double check if user is still logged in
+                const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+                if (!currentUser) {
+                    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                    showLoginRequiredMessage();
+                    return;
+                }
+
+                const formData = {
+                    productId: productId,
+                    customerName: document.getElementById('customerName').value,
+                    customerPhone: document.getElementById('customerPhone').value,
+                    customerEmail: document.getElementById('customerEmail').value,
+                    customerAddress: document.getElementById('customerAddress').value,
+                    quantity: parseInt(document.getElementById('quantity').value),
+                    expectedTime: document.getElementById('expectedTime').value,
+                    notes: document.getElementById('notes').value
+                };
+
+                // Create pre-order
+                createPreOrder(formData);
+            });
+        }
+
+        function showProductNotFound() {
+            const container = document.querySelector('.container .row .col-md-8 .card');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-4x text-danger mb-4"></i>
+                    <h3 class="text-danger mb-3">Không tìm thấy sản phẩm</h3>
+                    <p class="text-muted mb-4">
+                        Sản phẩm bạn muốn đặt hàng trước không tồn tại hoặc đã bị xóa.
+                    </p>
+                    
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">
+                            <i class="fas fa-shopping-bag me-2"></i>Xem tất cả sản phẩm
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="window.location.href='index.html'">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createPreOrder(formData) {
+            const user = JSON.parse(localStorage.getItem("currentUser"));
+            const products = refreshProducts();
+            const product = products.find(p => p.id === parseInt(formData.productId));
+            
+            if (!product) {
+                alert('Không tìm thấy sản phẩm!');
+                return;
+            }
+
+            // Validate form data
+            if (!formData.customerName.trim()) {
+                alert('Vui lòng nhập họ tên!');
+                return;
+            }
+            
+            if (!formData.customerPhone.trim()) {
+                alert('Vui lòng nhập số điện thoại!');
+                return;
+            }
+            
+            if (!formData.customerAddress.trim()) {
+                alert('Vui lòng nhập địa chỉ giao hàng!');
+                return;
+            }
+            
+            if (formData.quantity < 1) {
+                alert('Số lượng phải lớn hơn 0!');
+                return;
+            }
+
+            // Generate order ID
+            const orderId = generateOrderId();
+            
+            // Create order data
+            const orderData = {
+                id: orderId,
+                date: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('vi-VN'),
+                items: [{
+                    id: product.id,
+                    title: product.title,
+                    price: product.price,
+                    thumbnail: product.thumbnail,
+                    quantity: formData.quantity,
+                    isPreOrder: true
+                }],
+                status: 'pending',
+                paymentMethod: 'cod',
+                hasPreOrder: true,
+                customerInfo: {
+                    name: formData.customerName,
+                    phone: formData.customerPhone,
+                    address: formData.customerAddress,
+                    email: formData.customerEmail
+                },
+                preOrderInfo: {
+                    expectedTime: formData.expectedTime,
+                    notes: formData.notes
+                },
+                total: product.price * formData.quantity
+            };
+
+            // Save to orders
+            const allOrders = JSON.parse(localStorage.getItem("orders")) || {};
+            if (!allOrders[user.username]) allOrders[user.username] = [];
+            allOrders[user.username].push(orderData);
+            localStorage.setItem("orders", JSON.stringify(allOrders));
+
+            // Show success modal
+            document.getElementById('preOrderId').textContent = `#${orderId}`;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPreOrderSuccess')).show();
+            
+            // Show success toast
+            if (typeof showSuccessToast === 'function') {
+                showSuccessToast('Đặt hàng trước thành công! Chúng tôi sẽ liên hệ với bạn khi có hàng.');
+            }
+        }
+
+        function generateOrderId() {
+            const timestamp = Date.now().toString().slice(-6);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `HC${timestamp}${random}`;
+        }
+
+        // Listen for login success to reload the page
+        window.addEventListener('userLoggedIn', function() {
+            // Reload the page after successful login
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        });
+
+        // Category dropdown update
+        function updateCategoryDropdown() {
+            const categories = JSON.parse(localStorage.getItem('websiteCategories') || localStorage.getItem('categories')) || [];
+            const dropdown = document.querySelector('.dropdown-menu');
+            
+            if (dropdown && categories.length > 0) {
+                let newHTML = '';
+                categories.forEach(category => {
+                    newHTML += `<li><a class="dropdown-item" href="products.html?category=${category.value}">${category.name}</a></li>`;
+                });
+                dropdown.innerHTML = newHTML;
+            }
+        }
+        
+        window.addEventListener('categoriesUpdated', function(event) {
+            updateCategoryDropdown();
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCategoryDropdown();
+        });
+
+        // Admin login check
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('a')) {
+                if (typeof showAdminLogin === 'function') {
+                    showAdminLogin();
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

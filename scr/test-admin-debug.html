@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Admin Functions</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./fontawesome-free-6.3.0-web/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="fas fa-bug me-2"></i>Debug Admin Functions</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Test các function admin</h6>
+                            <p class="mb-0">Click các nút để test function hoạt động</p>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-success w-100" onclick="testShowAddProductModal()">
+                                    <i class="fas fa-plus me-2"></i>Test Thêm Sản Phẩm
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-info w-100" onclick="testLoadCategories()">
+                                    <i class="fas fa-tags me-2"></i>Test Load Categories
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-warning w-100" onclick="testLoadBrands()">
+                                    <i class="fas fa-award me-2"></i>Test Load Brands
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-secondary w-100" onclick="checkLocalStorage()">
+                                    <i class="fas fa-database me-2"></i>Check LocalStorage
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Console Output:</h6>
+                            <div id="debugOutput" class="border p-3 bg-light" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+                                <!-- Debug output will appear here -->
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <a href="admin.html" class="btn btn-primary me-2">
+                                <i class="fas fa-crown me-2"></i>Vào Admin Panel
+                            </a>
+                            <a href="index.html" class="btn btn-secondary">
+                                <i class="fas fa-home me-2"></i>Về trang chủ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal fade" id="testProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Test Product Modal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal hoạt động bình thường!</p>
+                    <form id="testProductForm">
+                        <div class="mb-3">
+                            <label class="form-label">Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="testProductTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục</label>
+                            <select class="form-select" id="testProductCategory">
+                                <option value="">Chọn danh mục</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="./js/lst-products.js"></script>
+    <script src="./js/admin.js"></script>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('debugOutput');
+            const time = new Date().toLocaleTimeString();
+            output.innerHTML += `[${time}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        function testShowAddProductModal() {
+            log('Testing showAddProductModal...');
+            try {
+                if (typeof showAddProductModal === 'function') {
+                    log('✓ Function exists');
+                    showAddProductModal();
+                    log('✓ Function executed');
+                } else {
+                    log('✗ Function not found');
+                }
+            } catch (error) {
+                log('✗ Error: ' + error.message);
+            }
+        }
+
+        function testLoadCategories() {
+            log('Testing categories...');
+            try {
+                const categories = JSON.parse(localStorage.getItem('categories')) || [];
+                log(`✓ Found ${categories.length} categories`);
+                categories.forEach(cat => log(`  - ${cat.name}`));
+            } catch (error) {
+                log('✗ Error: ' + error.message);
+            }
+        }
+
+        function testLoadBrands() {
+            log('Testing brands...');
+            try {
+                const brands = JSON.parse(localStorage.getItem('brands')) || [];
+                log(`✓ Found ${brands.length} brands`);
+                brands.forEach(brand => log(`  - ${brand.name}`));
+            } catch (error) {
+                log('✗ Error: ' + error.message);
+            }
+        }
+
+        function checkLocalStorage() {
+            log('Checking localStorage...');
+            try {
+                const keys = ['categories', 'brands', 'adminProducts', 'adminUser'];
+                keys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        log(`✓ ${key}: ${Array.isArray(parsed) ? parsed.length + ' items' : 'exists'}`);
+                    } else {
+                        log(`✗ ${key}: not found`);
+                    }
+                });
+            } catch (error) {
+                log('✗ Error: ' + error.message);
+            }
+        }
+
+        // Test simple modal
+        function testSimpleModal() {
+            log('Testing simple modal...');
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('testProductModal'));
+                modal.show();
+                log('✓ Simple modal works');
+            } catch (error) {
+                log('✗ Modal error: ' + error.message);
+            }
+        }
+
+        // Auto-run basic checks
+        document.addEventListener('DOMContentLoaded', function() {
+            log('=== Admin Debug Started ===');
+            checkLocalStorage();
+            
+            // Test if admin functions are loaded
+            const functions = ['showAddProductModal', 'loadCategories', 'loadBrands'];
+            functions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    log(`✓ ${func} loaded`);
+                } else {
+                    log(`✗ ${func} not loaded`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -157,7 +157,31 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Mật khẩu</label>
-                            <input type="password" id="authPassword" class="form-control" required>
+                            <input type="password" id="authPassword" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-3" id="authConfirmPasswordWrapper" style="display:none">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" id="authConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu">
+                        </div>
+                        <div class="alert alert-info" id="authPasswordInfo" style="display:none">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                Mật khẩu phải có ít nhất 6 ký tự
+                            </small>
+                        </div>
+                        <div class="invalid-feedback" id="authPasswordError" style="display:none">
+                            Mật khẩu phải có ít nhất 6 ký tự
+                        </div>
+                        <div class="invalid-feedback" id="authConfirmPasswordError" style="display:none">
+                            Mật khẩu xác nhận không khớp
+                        </div>
+                        <div class="mb-3" id="authAddressWrapper" style="display:none">
+                            <label class="form-label">Địa chỉ giao hàng</label>
+                            <input type="text" id="authAddress" class="form-control" placeholder="Nhập địa chỉ giao hàng mặc định">
+                        </div>
+                        <div class="mb-3" id="authPhoneWrapper" style="display:none">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" id="authPhone" class="form-control" placeholder="0123 456 789" pattern="0[0-9]{9}">
                         </div>
                         <div class="text-end">
                             <button class="btn btn-success">Xác nhận</button>

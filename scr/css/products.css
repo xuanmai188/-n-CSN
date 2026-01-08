@@ -300,3 +300,31 @@ body {
 .button {
   /* Remove old styles, now handled by .btn-buy */
 }
+
+/* Pre-order button styling */
+.btn-preorder {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.btn-preorder:hover {
+  background-color: #e0a800 !important;
+  border-color: #d39e00 !important;
+  color: #000 !important;
+}
+
+/* Stock badge styling */
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+/* Product card enhancements for stock status */
+.product-card .badge {
+  font-size: 0.75rem;
+  display: inline-block;
+}

@@ -104,20 +104,23 @@ function updateStockDisplay(product) {
   stockQuantityElement.textContent = stock;
 
   if (stock <= 0) {
-    // Hết hàng
+    // Hết hàng - cho phép đặt hàng trước
     stockStatusElement.textContent = "Hết hàng";
     stockStatusElement.className = "badge bg-danger";
     
-    // Disable các controls
-    addToCartButton.disabled = true;
-    addToCartButton.textContent = "Hết hàng";
-    addToCartButton.className = "btn btn-secondary";
+    // Change to pre-order button
+    addToCartButton.disabled = false;
+    addToCartButton.textContent = "Đặt hàng trước";
+    addToCartButton.className = "btn btn-warning";
+    addToCartButton.setAttribute('onclick', `handleDetailPreOrder(${product.id})`);
     
-    quantityInput.disabled = true;
-    plusButton.disabled = true;
-    minusButton.disabled = true;
+    quantityInput.disabled = false;
+    plusButton.disabled = false;
+    minusButton.disabled = false;
     
-    quantityInput.value = 0;
+    // Set default quantity for pre-order
+    quantityInput.value = 1;
+    quantityInput.max = 99; // Allow higher quantity for pre-orders
   } else if (stock <= 5) {
     // Sắp hết hàng
     stockStatusElement.textContent = "Sắp hết hàng";
@@ -127,6 +130,8 @@ function updateStockDisplay(product) {
     addToCartButton.disabled = false;
     addToCartButton.textContent = "Thêm vào giỏ hàng";
     addToCartButton.className = "btn btn-success";
+    addToCartButton.setAttribute('onclick', 'addToCart()');
+    addToCartButton.removeAttribute('data-preorder');
     
     quantityInput.disabled = false;
     plusButton.disabled = false;
@@ -143,6 +148,8 @@ function updateStockDisplay(product) {
     addToCartButton.disabled = false;
     addToCartButton.textContent = "Thêm vào giỏ hàng";
     addToCartButton.className = "btn btn-success";
+    addToCartButton.setAttribute('onclick', 'addToCart()');
+    addToCartButton.removeAttribute('data-preorder');
     
     quantityInput.disabled = false;
     plusButton.disabled = false;
@@ -221,23 +228,27 @@ function addToCart() {
 
   const product = window.currentProduct;
   const quantity = parseInt(document.getElementById("product-quantity").value) || 1;
+  const addToCartButton = document.querySelector('button[onclick="addToCart()"]');
+  const isPreOrder = addToCartButton.getAttribute('data-preorder') === 'true';
   
-  // Kiểm tra tồn kho
-  if (product.stock <= 0) {
-    alert('Sản phẩm đã hết hàng!');
-    return;
-  }
-  
-  if (quantity > product.stock) {
-    alert(`Chỉ còn ${product.stock} sản phẩm trong kho!`);
-    return;
-  }
-
   // Kiểm tra đăng nhập
   const user = JSON.parse(localStorage.getItem("currentUser"));
   if (!user) {
     alert("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
     return;
+  }
+
+  // Kiểm tra tồn kho cho đơn hàng thường
+  if (!isPreOrder) {
+    if (product.stock <= 0) {
+      alert('Sản phẩm đã hết hàng!');
+      return;
+    }
+    
+    if (quantity > product.stock) {
+      alert(`Chỉ còn ${product.stock} sản phẩm trong kho!`);
+      return;
+    }
   }
 
   // Thêm vào giỏ hàng
@@ -247,13 +258,20 @@ function addToCart() {
   const existingItem = cart.find(item => item.id === product.id);
   
   if (existingItem) {
-    // Kiểm tra tổng số lượng không vượt quá tồn kho
-    const newQuantity = existingItem.quantity + quantity;
-    if (newQuantity > product.stock) {
-      alert(`Không thể thêm ${quantity} sản phẩm. Chỉ còn ${product.stock - existingItem.quantity} sản phẩm có thể thêm vào giỏ hàng!`);
-      return;
+    // Kiểm tra tổng số lượng không vượt quá tồn kho (chỉ cho đơn hàng thường)
+    if (!isPreOrder) {
+      const newQuantity = existingItem.quantity + quantity;
+      if (newQuantity > product.stock) {
+        alert(`Không thể thêm ${quantity} sản phẩm. Chỉ còn ${product.stock - existingItem.quantity} sản phẩm có thể thêm vào giỏ hàng!`);
+        return;
+      }
     }
-    existingItem.quantity = newQuantity;
+    existingItem.quantity += quantity;
+    
+    // Cập nhật loại đơn hàng nếu cần
+    if (isPreOrder) {
+      existingItem.isPreOrder = true;
+    }
   } else {
     cart.push({
       id: product.id,
@@ -261,7 +279,8 @@ function addToCart() {
       price: product.price,
       thumbnail: product.thumbnail,
       quantity: quantity,
-      maxStock: product.stock
+      maxStock: product.stock,
+      isPreOrder: isPreOrder || false
     });
   }
 
@@ -276,7 +295,10 @@ function addToCart() {
   }
 
   // Hiển thị thông báo thành công
-  showSuccessMessage(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+  const message = isPreOrder 
+    ? `Đã thêm ${quantity} sản phẩm vào danh sách đặt hàng trước!`
+    : `Đã thêm ${quantity} sản phẩm vào giỏ hàng!`;
+  showSuccessMessage(message);
 }
 
 function showSuccessMessage(message) {
@@ -606,3 +628,35 @@ function generateStarsHTML(rating) {
   }
   return html;
 }
+// Handle pre-order from detail page
+function handleDetailPreOrder(productId) {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+  
+  if (!user) {
+    // User not logged in - show login modal
+    if (typeof openAuthModal === 'function') {
+      // Store the product ID for after login
+      localStorage.setItem('pendingPreOrderId', productId);
+      openAuthModal();
+    } else {
+      alert('Vui lòng đăng nhập để đặt hàng trước!');
+    }
+  } else {
+    // User logged in - go to pre-order page with quantity
+    const quantity = parseInt(document.getElementById("product-quantity").value) || 1;
+    window.location.href = `pre-order.html?id=${productId}&qty=${quantity}`;
+  }
+}
+
+// Listen for successful login to handle pending pre-order
+window.addEventListener('userLoggedIn', function() {
+  const pendingPreOrderId = localStorage.getItem('pendingPreOrderId');
+  if (pendingPreOrderId) {
+    localStorage.removeItem('pendingPreOrderId');
+    // Redirect to pre-order page after a short delay
+    const quantity = parseInt(document.getElementById("product-quantity")?.value) || 1;
+    setTimeout(() => {
+      window.location.href = `pre-order.html?id=${pendingPreOrderId}&qty=${quantity}`;
+    }, 1000);
+  }
+});

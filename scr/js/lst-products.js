@@ -8,10 +8,31 @@ function getProducts() {
   }
   
   if (adminProducts && adminProducts.length > 0) {
-    // Filter products that are in stock and active (hide out of stock products)
-    return adminProducts.filter(p => p.stock > 0 && (p.status === 'active' || !p.status)).map(addUsageData);
+    // Sync new default products to admin if needed
+    syncDefaultToAdmin();
+    // Get updated admin products after sync
+    const updatedAdminProducts = JSON.parse(localStorage.getItem("adminProducts"));
+    // Show all products including out of stock - only filter out inactive products
+    return updatedAdminProducts.filter(p => p.status !== 'inactive').map(addUsageData);
   }
-  return defaultProducts.filter(p => p.stock > 0).map(addUsageData);
+  // Show all default products including out of stock
+  return defaultProducts.map(addUsageData);
+}
+
+// Function to sync new default products to admin products
+function syncDefaultToAdmin() {
+  let adminProducts = JSON.parse(localStorage.getItem("adminProducts")) || [];
+  const adminIds = adminProducts.map(p => p.id);
+  
+  // Find new products in defaultProducts that don't exist in adminProducts
+  const newProducts = defaultProducts.filter(p => !adminIds.includes(p.id));
+  
+  if (newProducts.length > 0) {
+    // Add new products to admin
+    adminProducts = [...adminProducts, ...newProducts];
+    localStorage.setItem("adminProducts", JSON.stringify(adminProducts));
+    console.log(`Synced ${newProducts.length} new products to admin`);
+  }
 }
 
 // Function to add usage data to products
@@ -67,6 +88,9 @@ function addUsageData(product) {
 
 // Function to refresh products (gọi khi cần cập nhật)
 function refreshProducts() {
+  // Always sync new products when refreshing
+  syncDefaultToAdmin();
+  
   if (typeof window !== 'undefined') {
     window.products = getProducts();
   }
@@ -75,7 +99,7 @@ function refreshProducts() {
 
 var defaultProducts = [
   {
-    id: 1,
+    id: 47,
     title: "Ngũ cốc ăn sáng hữu cơ giàu chất xơ Cascadian Farm, không biến đổi gen, 14,6 oz.",
     description: "<ul><li>Được thành lập tại Skagit Valley, WA</li><li>30 g ngũ cốc nguyên hạt mỗi khẩu phần</li><li>Ít nhất 48 g được khuyến nghị hàng ngày</li><li>10 g chất xơ mỗi khẩu phần</li><li>3,5 g tổng chất béo mỗi khẩu phần</li><li>Được chứng nhận bởi Dự án Không biến đổi gen</li><li>Hữu cơ USDA</li><li>Kosher</li><li>Được chứng nhận hữu cơ bởi Oregon Tilth</li></ul><p>Những miếng lúa mì nguyên hạt hữu cơ, cụm granola và những sợi cám giòn tan - một cách tuyệt vời để bắt đầu ngày mới!<br></p>",
     price: 215000,
@@ -93,7 +117,7 @@ var defaultProducts = [
     ],
   },
   {
-    id: 2,
+    id: 48,
     title: "Đậu lăng Great Value, 450g",
     description: "<b>Đậu lăng Great Value, 450g:</b> <ul> <li>Đậu lăng khô</li> <li>110 calo mỗi khẩu phần</li> <li>Không chứa natri, cholesterol, chất béo bão hòa hoặc chất béo chuyển hóa</li> <li>4g chất xơ mỗi khẩu phần</li> <li>Khoảng 13 khẩu phần mỗi hộp</li> </ul>",
     price: 35000,
@@ -203,7 +227,7 @@ var defaultProducts = [
     description: '',
     price: 26000,
     review: 9,
-    stock: 67,
+    stock: 0, // Set to 0 for testing pre-order functionality
     brand: "",
     category: "Fresh Vegetables",
     thumbnail: "./data/products/8/thumbnail.jpg",
@@ -280,7 +304,7 @@ var defaultProducts = [
     description: '',
     price: 11000,
     review: 9,
-    stock: 29,
+    stock: 0, // Set to 0 for testing pre-order functionality
     brand: "",
     category: "Fresh Vegetables",
     thumbnail: "./data/products/14/thumbnail.jpg",
@@ -430,12 +454,293 @@ var defaultProducts = [
     thumbnail: "./data/products/26/thumbnail.jpg",
     images: [],
   },
+  {
+    id: 27,
+    title: "Yến mạch hữu cơ nguyên hạt Organic Valley, 500g",
+    description: "Yến mạch hữu cơ nguyên hạt chất lượng cao, giàu chất xơ và protein. Lý tưởng cho bữa sáng bổ dưỡng.",
+    price: 125000,
+    discountPercentage: 145000,
+    review: 25,
+    stock: 45,
+    brand: "Organic Valley",
+    category: "Nutritious cereals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 28,
+    title: "Đậu đen hữu cơ Star Organic, 400g",
+    description: "Đậu đen hữu cơ tự nhiên, giàu protein và chất xơ. Tốt cho sức khỏe tim mạch.",
+    price: 65000,
+    discountPercentage: 75000,
+    review: 18,
+    stock: 32,
+    brand: "Star Organic",
+    category: "Pulses",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 29,
+    title: "Bột quế Ceylon nguyên chất, 100g",
+    description: "Bột quế Ceylon cao cấp, hương thơm đặc trưng. Tốt cho tiêu hóa và kiểm soát đường huyết.",
+    price: 85000,
+    discountPercentage: 95000,
+    review: 22,
+    stock: 28,
+    brand: "",
+    category: "Spices and Condiments",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 30,
+    title: "Gạo ST25 hữu cơ cao cấp, 5kg",
+    description: "Gạo ST25 hữu cơ được trồng theo tiêu chuẩn hữu cơ, hạt dài, thơm ngon tự nhiên.",
+    price: 350000,
+    discountPercentage: 420000,
+    review: 45,
+    stock: 25,
+    brand: "Star Organic",
+    category: "Rice",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 31,
+    title: "Bột mì nguyên cám hữu cơ Nature's Path, 1kg",
+    description: "Bột mì nguyên cám hữu cơ, giàu chất xơ và vitamin nhóm B. Lý tưởng cho bánh mì và bánh ngọt.",
+    price: 95000,
+    discountPercentage: 110000,
+    review: 31,
+    stock: 38,
+    brand: "Nature's Path",
+    category: "Flours & Meals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 32,
+    title: "Dầu dừa nguyên chất ép lạnh, 500ml",
+    description: "Dầu dừa nguyên chất ép lạnh, giữ nguyên dưỡng chất. Tốt cho nấu ăn và chăm sóc da.",
+    price: 180000,
+    discountPercentage: 210000,
+    review: 38,
+    stock: 42,
+    brand: "",
+    category: "Cooking oils",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 33,
+    title: "Quinoa hữu cơ ba màu, 350g",
+    description: "Quinoa hữu cơ ba màu (trắng, đỏ, đen), siêu thực phẩm giàu protein hoàn chỉnh.",
+    price: 155000,
+    discountPercentage: 185000,
+    review: 27,
+    stock: 35,
+    brand: "Organic Valley",
+    category: "Nutritious cereals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 34,
+    title: "Đậu xanh hữu cơ Great Value, 500g",
+    description: "Đậu xanh hữu cơ chất lượng cao, dễ nấu chín, giàu protein thực vật.",
+    price: 45000,
+    discountPercentage: 55000,
+    review: 19,
+    stock: 48,
+    brand: "Great Value",
+    category: "Pulses",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 35,
+    title: "Muối hồng Himalaya nguyên chất, 250g",
+    description: "Muối hồng Himalaya nguyên chất, giàu khoáng chất tự nhiên, vị ngọt thanh.",
+    price: 75000,
+    discountPercentage: 85000,
+    review: 33,
+    stock: 52,
+    brand: "",
+    category: "Spices and Condiments",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 36,
+    title: "Gạo lứt đỏ hữu cơ, 2kg",
+    description: "Gạo lứt đỏ hữu cơ, giàu chất xơ và anthocyanin. Tốt cho sức khỏe tim mạch.",
+    price: 165000,
+    discountPercentage: 195000,
+    review: 24,
+    stock: 29,
+    brand: "Star Organic",
+    category: "Rice",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 37,
+    title: "Bột hạnh nhân nguyên chất, 300g",
+    description: "Bột hạnh nhân nguyên chất, không gluten, giàu protein và vitamin E.",
+    price: 220000,
+    discountPercentage: 260000,
+    review: 21,
+    stock: 26,
+    brand: "",
+    category: "Flours & Meals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 38,
+    title: "Dầu oliva nguyên chất Extra Virgin, 750ml",
+    description: "Dầu oliva nguyên chất Extra Virgin, ép lạnh đầu tiên, hương vị đậm đà.",
+    price: 285000,
+    discountPercentage: 340000,
+    review: 42,
+    stock: 31,
+    brand: "",
+    category: "Cooking oils",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 39,
+    title: "Vitamin C Nature's Way, 1000mg, 100 viên",
+    description: "Vitamin C liều cao 1000mg, tăng cường miễn dịch, chống oxy hóa mạnh mẽ.",
+    price: 195000,
+    discountPercentage: 230000,
+    review: 36,
+    stock: 44,
+    brand: "Nature's Way",
+    category: "Cooking oils",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 40,
+    title: "Cà rót hữu cơ tươi, 500g",
+    description: "Cà rót hữu cơ tươi, màu tím đậm, giàu anthocyanin và chất xơ.",
+    price: 35000,
+    review: 15,
+    stock: 38,
+    brand: "",
+    category: "Fresh Vegetables",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 41,
+    title: "Chia seeds hữu cơ Organic Valley, 250g",
+    description: "Hạt chia hữu cơ, siêu thực phẩm giàu omega-3, chất xơ và protein.",
+    price: 135000,
+    discountPercentage: 165000,
+    review: 29,
+    stock: 33,
+    brand: "Organic Valley",
+    category: "Nutritious cereals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 42,
+    title: "Đậu đỏ kidney hữu cơ, 400g",
+    description: "Đậu đỏ kidney hữu cơ, hình quả thận đặc trưng, giàu protein và sắt.",
+    price: 55000,
+    discountPercentage: 68000,
+    review: 17,
+    stock: 41,
+    brand: "Great Value",
+    category: "Pulses",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 43,
+    title: "Tiêu đen nguyên hạt Kampot, 100g",
+    description: "Tiêu đen Kampot nguyên hạt, hương vị cay nồng đặc trưng, chất lượng cao.",
+    price: 125000,
+    discountPercentage: 145000,
+    review: 23,
+    stock: 27,
+    brand: "",
+    category: "Spices and Condiments",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 44,
+    title: "Gạo tám xoan hữu cơ, 3kg",
+    description: "Gạo tám xoan hữu cơ truyền thống, hạt tròn, dẻo thơm, nấu cơm ngon.",
+    price: 245000,
+    discountPercentage: 285000,
+    review: 34,
+    stock: 22,
+    brand: "Star Organic",
+    category: "Rice",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 45,
+    title: "Bột yến mạch nguyên chất, 500g",
+    description: "Bột yến mạch nguyên chất, xay mịn từ yến mạch hữu cơ, giàu beta-glucan.",
+    price: 85000,
+    discountPercentage: 105000,
+    review: 26,
+    stock: 39,
+    brand: "Nature's Path",
+    category: "Flours & Meals",
+    thumbnail: "",
+    images: [],
+  },
+  {
+    id: 46,
+    title: "Dầu hạt lanh ép lạnh, 250ml",
+    description: "Dầu hạt lanh ép lạnh, giàu omega-3, tốt cho não bộ và tim mạch.",
+    price: 165000,
+    discountPercentage: 195000,
+    review: 20,
+    stock: 28,
+    brand: "",
+    category: "Cooking oils",
+    thumbnail: "",
+    images: [],
+  },
 ];
 
 // Use the dynamic products function
 var products = getProducts();
 
+// Function to force sync all default products to admin (for immediate update)
+function forceSyncProducts() {
+  localStorage.setItem("adminProducts", JSON.stringify(defaultProducts));
+  console.log(`Force synced ${defaultProducts.length} products to admin`);
+  products = refreshProducts();
+  
+  // Trigger page refresh if needed
+  if (typeof window !== 'undefined' && window.location) {
+    // Dispatch event to notify other parts of the app
+    window.dispatchEvent(new CustomEvent('productsUpdated'));
+  }
+}
+
 // Refresh products when page loads
 document.addEventListener('DOMContentLoaded', function() {
   products = refreshProducts();
+  
+  // Auto-sync if admin has fewer products than default
+  const adminProducts = JSON.parse(localStorage.getItem("adminProducts")) || [];
+  if (adminProducts.length < defaultProducts.length) {
+    console.log('Auto-syncing new products...');
+    setTimeout(() => {
+      products = refreshProducts();
+    }, 500);
+  }
 });

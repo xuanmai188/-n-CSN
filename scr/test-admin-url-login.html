@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin URL Login</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./fontawesome-free-6.3.0-web/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="fas fa-test-tube me-2"></i>Test Admin URL Login System</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Hướng dẫn test:</h6>
+                            <p>Hệ thống đã được cập nhật để xóa link "Admin Panel" từ footer và thay thế bằng đăng nhập qua URL parameter.</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6><i class="fas fa-check me-2"></i>Cách đăng nhập Admin mới</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Thêm ?a vào cuối URL:</strong></p>
+                                        <ul class="list-unstyled">
+                                            <li><a href="index.html?a" class="btn btn-outline-primary btn-sm mb-2 w-100">index.html?a</a></li>
+                                            <li><a href="products.html?a" class="btn btn-outline-primary btn-sm mb-2 w-100">products.html?a</a></li>
+                                            <li><a href="contact-us.html?a" class="btn btn-outline-primary btn-sm mb-2 w-100">contact-us.html?a</a></li>
+                                            <li><a href="about-us.html?a" class="btn btn-outline-primary btn-sm mb-2 w-100">about-us.html?a</a></li>
+                                        </ul>
+                                        <div class="alert alert-warning mt-3">
+                                            <small><i class="fas fa-key me-1"></i>Tài khoản admin: <strong>admin / admin123</strong></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6><i class="fas fa-times me-2"></i>Đã xóa khỏi Footer</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Link "Admin Panel" đã được xóa khỏi footer của tất cả các trang:</p>
+                                        <ul class="small">
+                                            <li>index.html</li>
+                                            <li>products.html</li>
+                                            <li>about-us.html</li>
+                                            <li>contact-us.html</li>
+                                            <li>detail.html</li>
+                                            <li>Và tất cả các trang khác...</li>
+                                        </ul>
+                                        <div class="alert alert-info mt-3">
+                                            <small><i class="fas fa-shield-alt me-1"></i>Bảo mật cao hơn - không hiển thị công khai</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6><i class="fas fa-cogs me-2"></i>Cách hoạt động</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>Khi truy cập URL có parameter <code>?a</code>, JavaScript sẽ tự động hiển thị modal đăng nhập admin</li>
+                                        <li>Modal sử dụng function <code>showAdminLogin()</code> có sẵn trong <code>auth-cart.js</code></li>
+                                        <li>Sau khi đăng nhập thành công, sẽ chuyển hướng đến <code>admin.html</code></li>
+                                        <li>Link admin không còn hiển thị công khai trong footer</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <a href="index.html" class="btn btn-secondary me-2">
+                                <i class="fas fa-home me-2"></i>Về trang chủ
+                            </a>
+                            <a href="admin.html" class="btn btn-primary">
+                                <i class="fas fa-crown me-2"></i>Vào Admin (nếu đã đăng nhập)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

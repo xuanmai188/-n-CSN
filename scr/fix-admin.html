@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Admin Panel</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4>🔧 Sửa lỗi Admin Panel</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Đang khôi phục admin panel...</strong>
+                </div>
+                
+                <div class="progress mb-3">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                
+                <div id="status"></div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="fixAdmin()">🔧 Sửa Admin</button>
+                    <button class="btn btn-primary" onclick="restoreData()">📦 Khôi phục dữ liệu</button>
+                    <a href="admin.html" class="btn btn-warning">🚀 Vào Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="./js/lst-products.js"></script>
+    
+    <script>
+        function updateProgress(percent, message) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('status').innerHTML += '<div class="alert alert-info">' + message + '</div>';
+        }
+
+        function fixAdmin() {
+            updateProgress(10, '🔧 Bắt đầu sửa admin...');
+            
+            // Clear any corrupted data
+            localStorage.removeItem('preventSampleData');
+            updateProgress(20, '✅ Xóa flag corrupt');
+            
+            // Restore admin user
+            localStorage.setItem('adminUser', JSON.stringify({
+                username: 'admin',
+                password: 'admin123',
+                role: 'admin'
+            }));
+            updateProgress(30, '✅ Khôi phục admin user');
+            
+            // Restore categories
+            const categories = [
+                { id: 1, name: "Ngũ cốc bổ dưỡng", value: "Nutritious cereals" },
+                { id: 2, name: "Các loại đậu", value: "Pulses" },
+                { id: 3, name: "Gia vị và nước chấm", value: "Spices and Condiments" },
+                { id: 4, name: "Thực phẩm chức năng và mỹ phẩm thiên nhiên", value: "Cooking oils" },
+                { id: 5, name: "Gạo và các sản phẩm từ gạo", value: "Rice" }
+            ];
+            localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('websiteCategories', JSON.stringify(categories));
+            updateProgress(50, '✅ Khôi phục categories');
+            
+            // Restore brands
+            const brands = [
+                { id: 1, name: "Organic Valley", description: "Sản phẩm hữu cơ chất lượng cao" },
+                { id: 2, name: "Great Value", description: "Thương hiệu giá trị tốt" },
+                { id: 3, name: "Star Organic", description: "Thương hiệu chính của trang trại" }
+            ];
+            localStorage.setItem('brands', JSON.stringify(brands));
+            updateProgress(70, '✅ Khôi phục brands');
+            
+            // Restore products from default
+            try {
+                const defaultProducts = refreshProducts();
+                if (defaultProducts && defaultProducts.length > 0) {
+                    localStorage.setItem('products', JSON.stringify(defaultProducts));
+                    localStorage.setItem('adminProducts', JSON.stringify(defaultProducts));
+                    updateProgress(90, '✅ Khôi phục ' + defaultProducts.length + ' sản phẩm');
+                } else {
+                    updateProgress(90, '⚠️ Không tìm thấy default products');
+                }
+            } catch (error) {
+                updateProgress(90, '❌ Lỗi khôi phục products: ' + error.message);
+            }
+            
+            updateProgress(100, '🎉 Hoàn thành! Admin đã được sửa.');
+            
+            setTimeout(() => {
+                alert('✅ Admin panel đã được sửa thành công!\n\nHãy vào admin.html để kiểm tra.');
+            }, 1000);
+        }
+
+        function restoreData() {
+            updateProgress(10, '📦 Bắt đầu khôi phục dữ liệu...');
+            
+            // Sample users
+            const users = [
+                { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' },
+                { id: 2, username: 'user1', password: '123456', role: 'user', name: 'Nguyễn Văn A', address: 'Hà Nội', phone: '0123456789' },
+                { id: 3, username: 'user2', password: '123456', role: 'user', name: 'Trần Thị B', address: 'TP.HCM', phone: '0987654321' }
+            ];
+            localStorage.setItem('users', JSON.stringify(users));
+            updateProgress(30, '✅ Khôi phục users');
+            
+            // Sample orders
+            const orders = {
+                'user1': [
+                    {
+                        id: 'HC0001',
+                        customerName: 'Nguyễn Văn A',
+                        customerPhone: '0123456789',
+                        customerAddress: 'Hà Nội',
+                        paymentMethod: 'cod',
+                        status: 'completed',
+                        date: new Date().toISOString(),
+                        items: [
+                            { id: 1, title: 'Gạo hữu cơ', price: 50000, quantity: 2 },
+                            { id: 2, title: 'Đậu xanh hữu cơ', price: 30000, quantity: 1 }
+                        ]
+                    }
+                ],
+                'user2': [
+                    {
+                        id: 'HC0002',
+                        customerName: 'Trần Thị B',
+                        customerPhone: '0987654321',
+                        customerAddress: 'TP.HCM',
+                        paymentMethod: 'bank',
+                        status: 'pending',
+                        date: new Date().toISOString(),
+                        items: [
+                            { id: 3, title: 'Gia vị hữu cơ', price: 25000, quantity: 3 }
+                        ]
+                    }
+                ]
+            };
+            localStorage.setItem('orders', JSON.stringify(orders));
+            updateProgress(60, '✅ Khôi phục orders');
+            
+            // Product reviews
+            const reviews = {
+                '1': [
+                    { id: 1, username: 'user1', rating: 5, comment: 'Sản phẩm rất tốt!', date: new Date().toISOString() }
+                ],
+                '2': [
+                    { id: 2, username: 'user2', rating: 4, comment: 'Chất lượng ổn', date: new Date().toISOString() }
+                ]
+            };
+            localStorage.setItem('productReviews', JSON.stringify(reviews));
+            updateProgress(80, '✅ Khôi phục reviews');
+            
+            updateProgress(100, '🎉 Hoàn thành! Dữ liệu đã được khôi phục.');
+            
+            setTimeout(() => {
+                alert('✅ Dữ liệu đã được khôi phục thành công!\n\n- 3 users (admin, user1, user2)\n- 2 đơn hàng\n- Reviews sản phẩm\n\nHãy vào admin.html để kiểm tra.');
+            }, 1000);
+        }
+
+        // Auto fix on load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                updateProgress(5, '🚀 Trang đã load, sẵn sàng sửa admin...');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -109,6 +109,22 @@ function showSP(category_arr = [], price_arr = [], usage_arr = []) {
       `;
     }
 
+    // ===== XỬ LÝ TÌNH TRẠNG TỒN KHO =====
+    const stock = product.stock || 0;
+    let stockBadgeHTML = "";
+    let buttonText = "Mua ngay";
+    let buttonClass = "btn-buy";
+    let buttonAction = `href="detail.html?id=${product.id}"`;
+    
+    if (stock <= 0) {
+      stockBadgeHTML = `<span class="badge bg-danger mb-2">Hết hàng</span>`;
+      buttonText = "Đặt hàng";
+      buttonClass = "btn-buy btn-preorder";
+      buttonAction = `href="#" onclick="handlePreOrder(${product.id}); return false;"`;
+    } else if (stock <= 5) {
+      stockBadgeHTML = `<span class="badge bg-warning text-dark mb-2">Sắp hết hàng</span>`;
+    }
+
     all_item.innerHTML += `
       <div class="product-card">
         <div class="product-image-wrapper">
@@ -123,6 +139,7 @@ function showSP(category_arr = [], price_arr = [], usage_arr = []) {
             ${product.title}
           </a>
 
+          ${stockBadgeHTML}
           ${usageTagsHTML}
           ${ratingHTML}
 
@@ -134,8 +151,8 @@ function showSP(category_arr = [], price_arr = [], usage_arr = []) {
           </div>
 
           <div class="product-actions">
-            <a class="btn-buy" href="detail.html?id=${product.id}">
-              <i class="fas fa-shopping-cart me-2"></i>Mua ngay
+            <a class="${buttonClass}" ${buttonAction}>
+              <i class="fas fa-shopping-cart me-2"></i>${buttonText}
             </a>
           </div>
         </div>
@@ -431,6 +448,22 @@ function onSearch() {
       `;
     }
 
+    // ===== XỬ LÝ TÌNH TRẠNG TỒN KHO =====
+    const stock = sp.stock || 0;
+    let stockBadgeHTML = "";
+    let buttonText = "Mua ngay";
+    let buttonClass = "btn-buy";
+    let buttonAction = `href="detail.html?id=${sp.id}"`;
+    
+    if (stock <= 0) {
+      stockBadgeHTML = `<span class="badge bg-danger mb-2">Hết hàng</span>`;
+      buttonText = "Đặt hàng";
+      buttonClass = "btn-buy btn-preorder";
+      buttonAction = `href="#" onclick="handlePreOrder(${sp.id}); return false;"`;
+    } else if (stock <= 5) {
+      stockBadgeHTML = `<span class="badge bg-warning text-dark mb-2">Sắp hết hàng</span>`;
+    }
+
     all_item.innerHTML += `
       <div class="product-card">
         <div class="product-image-wrapper">
@@ -445,6 +478,7 @@ function onSearch() {
             ${sp.title}
           </a>
 
+          ${stockBadgeHTML}
           ${usageTagsHTML}
 
           <div class="product-price">
@@ -453,8 +487,8 @@ function onSearch() {
           </div>
 
           <div class="product-actions">
-            <a class="btn-buy" href="detail.html?id=${sp.id}">
-              <i class="fas fa-shopping-cart me-2"></i>Mua ngay
+            <a class="${buttonClass}" ${buttonAction}>
+              <i class="fas fa-shopping-cart me-2"></i>${buttonText}
             </a>
           </div>
         </div>
@@ -522,3 +556,37 @@ function generateStarsHTML(rating) {
   }
   return html;
 }
+/***********************
+ * PRE-ORDER HANDLING
+ ***********************/
+
+// Handle pre-order button click
+function handlePreOrder(productId) {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+  
+  if (!user) {
+    // User not logged in - show login modal
+    if (typeof openAuthModal === 'function') {
+      // Store the product ID for after login
+      localStorage.setItem('pendingPreOrderId', productId);
+      openAuthModal();
+    } else {
+      alert('Vui lòng đăng nhập để đặt hàng trước!');
+    }
+  } else {
+    // User logged in - go to pre-order page
+    window.location.href = `pre-order.html?id=${productId}`;
+  }
+}
+
+// Listen for successful login to handle pending pre-order
+window.addEventListener('userLoggedIn', function() {
+  const pendingPreOrderId = localStorage.getItem('pendingPreOrderId');
+  if (pendingPreOrderId) {
+    localStorage.removeItem('pendingPreOrderId');
+    // Redirect to pre-order page after a short delay
+    setTimeout(() => {
+      window.location.href = `pre-order.html?id=${pendingPreOrderId}`;
+    }, 1000);
+  }
+});

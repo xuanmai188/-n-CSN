@@ -229,6 +229,11 @@ function initAuth() {
         ).hide();
 
         renderUserArea();
+        
+        // Dispatch event for successful login
+        window.dispatchEvent(new CustomEvent('userLoggedIn', {
+            detail: { user: JSON.parse(localStorage.getItem(USER_KEY)) }
+        }));
     };
 }
 
@@ -582,28 +587,35 @@ function initCart() {
             return;
         }
 
-        // Kiểm tra tồn kho
-        if (product.stock <= 0) {
-            alert("Sản phẩm đã hết hàng!");
-            return;
-        }
+        // Xác định loại đơn hàng
+        const isPreOrder = product.stock <= 0;
 
-        if (qty > product.stock) {
-            alert(`Chỉ còn ${product.stock} sản phẩm trong kho!`);
-            return;
+        // Kiểm tra tồn kho cho đơn hàng thường
+        if (!isPreOrder) {
+            if (qty > product.stock) {
+                alert(`Chỉ còn ${product.stock} sản phẩm trong kho!`);
+                return;
+            }
         }
 
         let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
         const item = cart.find(i => i.id === productId);
 
         if (item) {
-            // Kiểm tra tổng số lượng không vượt quá tồn kho
-            const newQuantity = item.quantity + qty;
-            if (newQuantity > product.stock) {
-                alert(`Không thể thêm ${qty} sản phẩm. Chỉ còn ${product.stock - item.quantity} sản phẩm có thể thêm vào giỏ hàng!`);
-                return;
+            // Kiểm tra tổng số lượng không vượt quá tồn kho (chỉ cho đơn hàng thường)
+            if (!isPreOrder) {
+                const newQuantity = item.quantity + qty;
+                if (newQuantity > product.stock) {
+                    alert(`Không thể thêm ${qty} sản phẩm. Chỉ còn ${product.stock - item.quantity} sản phẩm có thể thêm vào giỏ hàng!`);
+                    return;
+                }
             }
-            item.quantity = newQuantity;
+            item.quantity += qty;
+            
+            // Cập nhật loại đơn hàng nếu cần
+            if (isPreOrder) {
+                item.isPreOrder = true;
+            }
         } else {
             cart.push({
                 id: product.id,
@@ -611,7 +623,8 @@ function initCart() {
                 price: product.price,
                 thumbnail: product.thumbnail,
                 quantity: qty,
-                maxStock: product.stock // Lưu thông tin tồn kho để kiểm tra sau
+                maxStock: product.stock,
+                isPreOrder: isPreOrder
             });
         }
 
@@ -620,7 +633,10 @@ function initCart() {
         renderCart();
         
         // Hiển thị thông báo thành công
-        showSuccessToast(`Đã thêm ${qty} sản phẩm "${product.title}" vào giỏ hàng!`);
+        const message = isPreOrder 
+            ? `Đã thêm ${qty} sản phẩm "${product.title}" vào danh sách đặt hàng trước!`
+            : `Đã thêm ${qty} sản phẩm "${product.title}" vào giỏ hàng!`;
+        showSuccessToast(message);
     };
 }
 
@@ -652,12 +668,18 @@ function renderCart() {
         const currentProduct = adminProducts.find(p => p.id === item.id);
         const currentStock = currentProduct ? currentProduct.stock : 0;
         
-        // Cảnh báo nếu không đủ hàng
+        // Cảnh báo nếu không đủ hàng (chỉ cho đơn hàng thường)
         let stockWarning = "";
-        if (currentStock <= 0) {
-            stockWarning = `<div class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Sản phẩm đã hết hàng!</div>`;
-        } else if (item.quantity > currentStock) {
-            stockWarning = `<div class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Chỉ còn ${currentStock} sản phẩm</div>`;
+        let orderTypeLabel = "";
+        
+        if (item.isPreOrder) {
+            orderTypeLabel = `<div class="text-warning small"><i class="fas fa-clock"></i> Đặt hàng trước</div>`;
+        } else {
+            if (currentStock <= 0) {
+                stockWarning = `<div class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Sản phẩm đã hết hàng!</div>`;
+            } else if (item.quantity > currentStock) {
+                stockWarning = `<div class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Chỉ còn ${currentStock} sản phẩm</div>`;
+            }
         }
         
         total += item.price * item.quantity;
@@ -669,9 +691,10 @@ function renderCart() {
                 <div class="input-group input-group-sm mt-1" style="width:120px">
                     <button class="btn btn-outline-secondary" onclick="changeQty(${item.id},-1)">−</button>
                     <input class="form-control text-center" value="${item.quantity}" readonly>
-                    <button class="btn btn-outline-secondary" onclick="changeQty(${item.id},1)" ${currentStock <= 0 || item.quantity >= currentStock ? 'disabled' : ''}>+</button>
+                    <button class="btn btn-outline-secondary" onclick="changeQty(${item.id},1)" ${!item.isPreOrder && (currentStock <= 0 || item.quantity >= currentStock) ? 'disabled' : ''}>+</button>
                 </div>
                 <small>${formatVND(item.price)}</small>
+                ${orderTypeLabel}
                 ${stockWarning}
             </div>
             <strong>${formatVND(item.price * item.quantity)}</strong>
@@ -687,8 +710,8 @@ window.changeQty = function (id, delta) {
     const item = cart.find(i => i.id === id);
     if (!item) return;
 
-    // Kiểm tra tồn kho khi tăng số lượng
-    if (delta > 0) {
+    // Kiểm tra tồn kho khi tăng số lượng (chỉ cho đơn hàng thường)
+    if (delta > 0 && !item.isPreOrder) {
         const currentProduct = adminProducts.find(p => p.id === id);
         const currentStock = currentProduct ? currentProduct.stock : 0;
         
@@ -708,7 +731,8 @@ window.changeQty = function (id, delta) {
     
     if (item.quantity <= 0) {
         cart = cart.filter(i => i.id !== id);
-        showSuccessToast(`🗑️ Đã xóa "${item.title}" khỏi giỏ hàng`);
+        const orderType = item.isPreOrder ? 'đặt hàng trước' : 'giỏ hàng';
+        showSuccessToast(`🗑️ Đã xóa "${item.title}" khỏi ${orderType}`);
     } else if (delta > 0) {
         showSuccessToast(`➕ Đã tăng số lượng "${item.title}" lên ${item.quantity}`);
     } else {
@@ -784,25 +808,35 @@ function initCheckout() {
             const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
             if (!cart.length) return alert("Giỏ hàng trống!");
 
-            // Kiểm tra tồn kho trước khi đặt hàng
-            const stockCheckResult = checkStockAvailability(cart);
-            if (!stockCheckResult.success) {
-                alert(stockCheckResult.message);
-                return;
+            // Phân loại đơn hàng thường và đặt hàng trước
+            const regularItems = cart.filter(item => !item.isPreOrder);
+            const preOrderItems = cart.filter(item => item.isPreOrder);
+
+            // Kiểm tra tồn kho cho đơn hàng thường
+            if (regularItems.length > 0) {
+                const stockCheckResult = checkStockAvailability(regularItems);
+                if (!stockCheckResult.success) {
+                    alert(stockCheckResult.message);
+                    return;
+                }
             }
 
             // Lấy phương thức thanh toán
             const paymentMethod = document.getElementById("payMethod").value;
             
-            // Xác định trạng thái đơn hàng dựa trên phương thức thanh toán
+            // Xác định trạng thái đơn hàng
             let orderStatus = 'pending'; // Mặc định chờ xử lý
-            if (paymentMethod === 'bank') {
-                orderStatus = 'completed'; // Chuyển khoản tự động hoàn thành
+            
+            // Nếu có đặt hàng trước, luôn để pending để admin xử lý
+            if (preOrderItems.length > 0) {
+                orderStatus = 'pending';
+            } else if (paymentMethod === 'bank') {
+                orderStatus = 'completed'; // Chuyển khoản tự động hoàn thành (chỉ cho đơn hàng thường)
             }
 
-            // Trừ tồn kho cho các sản phẩm trong đơn hàng (chỉ khi đã hoàn thành)
-            if (orderStatus === 'completed') {
-                updateProductStock(cart);
+            // Trừ tồn kho cho các sản phẩm thường (chỉ khi đã hoàn thành)
+            if (orderStatus === 'completed' && regularItems.length > 0) {
+                updateProductStock(regularItems);
             }
 
             // Lưu đơn hàng
@@ -816,6 +850,7 @@ function initCheckout() {
                 items: cart,
                 status: orderStatus,
                 paymentMethod: paymentMethod,
+                hasPreOrder: preOrderItems.length > 0,
                 customerInfo: {
                     name: document.getElementById("custName").value,
                     phone: document.getElementById("custPhone").value,
@@ -838,8 +873,10 @@ function initCheckout() {
             const orderId = document.getElementById("orderId");
             if (orderId) orderId.textContent = `#${orderData.id}`;
             
-            // Nếu thanh toán chuyển khoản, hiển thị thông tin ngân hàng
-            if (paymentMethod === 'bank') {
+            // Hiển thị thông báo phù hợp
+            if (preOrderItems.length > 0) {
+                showPreOrderSuccessMessage(orderData, preOrderItems.length);
+            } else if (paymentMethod === 'bank') {
                 showBankingInfo(orderData);
             } else {
                 bootstrap.Modal.getOrCreateInstance(document.getElementById("modalSuccess")).show();
@@ -868,16 +905,29 @@ window.openHistoryModal = function () {
     orders.forEach((order, idx) => {
         let total = 0;
         let itemsHtml = "";
+        let hasPreOrder = false;
+        
         order.items.forEach(item => {
             total += item.price * item.quantity;
+            const preOrderLabel = item.isPreOrder ? ' <span class="badge bg-warning text-dark">Đặt trước</span>' : '';
+            if (item.isPreOrder) hasPreOrder = true;
+            
             itemsHtml += `
             <tr>
-                <td>${item.title}</td>
+                <td>${item.title}${preOrderLabel}</td>
                 <td>${item.quantity}</td>
                 <td>${formatVND(item.price)}</td>
                 <td>${formatVND(item.price * item.quantity)}</td>
             </tr>`;
         });
+
+        // Thêm thông báo đặt hàng trước nếu có
+        const preOrderNotice = hasPreOrder || order.hasPreOrder ? `
+            <div class="alert alert-warning alert-sm mb-2">
+                <i class="fas fa-clock me-1"></i>
+                <small><strong>Đơn hàng có sản phẩm đặt trước:</strong> Admin sẽ liên hệ khi có hàng</small>
+            </div>
+        ` : '';
 
         html += `
         <div class="mb-4 border rounded p-3">
@@ -899,6 +949,7 @@ window.openHistoryModal = function () {
                     `}
                 </div>
             </div>
+            ${preOrderNotice}
             <div class="mb-2">
                 <small class="text-muted">
                     <i class="fas fa-credit-card me-1"></i>
@@ -1250,6 +1301,9 @@ function checkStockAvailability(cart) {
     const adminProducts = JSON.parse(localStorage.getItem("adminProducts")) || [];
     
     for (let cartItem of cart) {
+        // Bỏ qua kiểm tra tồn kho cho đặt hàng trước
+        if (cartItem.isPreOrder) continue;
+        
         const product = adminProducts.find(p => p.id === cartItem.id);
         
         if (!product) {
@@ -1335,6 +1389,72 @@ document.addEventListener('DOMContentLoaded', function() {
  * UTILITY FUNCTIONS
  ***********************/
 
+// Show pre-order success message
+function showPreOrderSuccessMessage(orderData, preOrderCount) {
+    const preOrderModal = document.getElementById('modalPreOrderSuccess');
+    if (!preOrderModal) {
+        createPreOrderSuccessModal();
+    }
+    
+    // Update order info in pre-order modal
+    document.getElementById('preOrderOrderId').textContent = `#${orderData.id}`;
+    document.getElementById('preOrderCount').textContent = preOrderCount;
+    document.getElementById('preOrderTotal').textContent = formatVND(orderData.total);
+    
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPreOrderSuccess')).show();
+}
+
+// Create pre-order success modal
+function createPreOrderSuccessModal() {
+    const modalHTML = `
+    <div class="modal fade" id="modalPreOrderSuccess" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-clock me-2"></i>Đặt hàng trước thành công!
+                    </h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4 class="text-success">Đặt hàng thành công!</h4>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Thông tin đơn hàng:</strong><br>
+                        Mã đơn hàng: <strong id="preOrderOrderId">#HC0001</strong><br>
+                        Số sản phẩm đặt trước: <strong id="preOrderCount">0</strong><br>
+                        Tổng tiền: <strong id="preOrderTotal">0đ</strong>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Lưu ý quan trọng:</strong><br>
+                        • Đơn hàng của bạn có chứa sản phẩm đặt hàng trước<br>
+                        • Admin sẽ liên hệ với bạn khi có hàng<br>
+                        • Bạn có thể theo dõi trạng thái đơn hàng trong lịch sử mua hàng<br>
+                        • Thanh toán sẽ được thực hiện khi giao hàng
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">
+                            <i class="fas fa-check me-2"></i>Đã hiểu
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="openHistoryModal(); bootstrap.Modal.getInstance(document.getElementById('modalPreOrderSuccess')).hide();">
+                            <i class="fas fa-history me-2"></i>Xem lịch sử đơn hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
 // Show success toast notification
 function showSuccessToast(message) {
     const toast = document.createElement('div');
@@ -1369,10 +1489,12 @@ function generateOrderId() {
 // Get status badge class
 function getStatusBadgeClass(status) {
     switch(status) {
-        case 'pending': return 'bg-warning text-dark';
-        case 'completed': return 'bg-success';
-        case 'cancelled': return 'bg-danger';
-        default: return 'bg-secondary';
+        case 'pending': return 'badge-warning';
+        case 'processing': return 'badge-info';
+        case 'shipped': return 'badge-primary';
+        case 'completed': return 'badge-success';
+        case 'cancelled': return 'badge-danger';
+        default: return 'badge-secondary';
     }
 }
 
@@ -1380,7 +1502,9 @@ function getStatusBadgeClass(status) {
 function getStatusText(status) {
     switch(status) {
         case 'pending': return 'Chờ xử lý';
-        case 'completed': return 'Đã xử lý';
+        case 'processing': return 'Đang xử lý';
+        case 'shipped': return 'Đã giao';
+        case 'completed': return 'Hoàn thành';
         case 'cancelled': return 'Đã hủy';
         default: return 'Không xác định';
     }
